@@ -27,6 +27,8 @@ Route::post('/register', [AuthController::class, 'register']);
 // Route::middleware(['auth', 'role:Cleaner'])->group(function () {
 Route::get('/cleaner/dashboard', [CleanerController::class, 'dashboard'])->name('cleaner.dashboard');
 Route::get('/cleaner/service', [CleanerController::class, 'index'])->name('cleaner.service.index');
+Route::post('/cleaner/order/{id}/update-status', [CleanerController::class, 'updateStatus'])->name('cleaner.order.updateStatus');
+
 Route::get('/cleaner/service/create', [CleanerController::class, 'createService'])->name('cleaner.services.create');
 Route::post('/cleaner/service', [CleanerController::class, 'storeService'])->name('cleaner.services.store');
 Route::get('/cleaner/service/{service}', [CleanerController::class, 'showService'])->name('cleaner.services.show');
@@ -49,7 +51,7 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 
 // Route::patch('/cleaner/orders/{order}/status', [CleanerController::class, 'updateStatus'])->name('cleaner.orders.status');
 
-Route::get('/dashboard', [ServiceController::class, 'index'])->name('user.dashboard');
+// Route::get('/dashboard', [ServiceController::class, 'index'])->name('user.dashboard');
 Route::post('/newsletter/subscribe', [ServiceController::class, 'subscribeNewsletter'])->name('newsletter.subscribe');
 
 Route::get('/cleaner/dashboard', [CleanerController::class, 'index'])->name('cleaner.dashboard');
@@ -67,13 +69,14 @@ Route::get('payment/create', [PaymentController::class, 'create'])->name('paymen
 // Route::post('user/order/create', [OrderController::class, 'store'])->name('user.order.store');
 // Route::post('/order/store', [OrderController::class, 'store'])->name('user.order.store');
 Route::post('/payment/store', [PaymentController::class, 'store'])->name('payment.store');
-
+Route::get('/payments', [PaymentController::class, 'index'])->name('payment.index');
+Route::get('/payment/invoice/download/{id}', [PaymentController::class, 'downloadInvoice'])->name('payment.downloadInvoice');
 // Hapus semua route yang duplikat dan gunakan group untuk rute user
 Route::group(['middleware' => 'auth'], function () {
     // Order routes
     Route::get('user/order/create', [OrderController::class, 'create'])->name('user.order.create');
     Route::post('user/order/store', [OrderController::class, 'store'])->name('user.order.store');
-    
+
     // Payment routes
     Route::get('payment/create', [PaymentController::class, 'create'])->name('payment.create');
     Route::post('payment/store', [PaymentController::class, 'store'])->name('payment.store');

@@ -5,24 +5,23 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Models\Payment;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class PaymentController extends Controller
 {
-    // public function create(Order $order)
-    // {
-    //     // Pastikan order milik user yang sedang login
-    //     if ($order->user_id !== auth()->id()) {
-    //         abort(403, 'Unauthorized action.');
-    //     }
+    public function index()
+    {
 
-    //     return view('payment.create', compact('order'));
-    // }
+        $invoices = session('invoice');
+        return view('payment.index', compact('invoices'));
+    }
+
     public function create(Request $request)
     {
         $order = Order::where('id', $request->order_id)
-                    ->where('user_id', auth()->id())
-                    ->firstOrFail();
-    
+            ->where('user_id', auth()->id())
+            ->firstOrFail();
+
         return view('payment.create', compact('order'));
     }
 
@@ -33,25 +32,59 @@ class PaymentController extends Controller
             'order_id' => 'required|exists:orders,id',
             'payment_method' => 'required|in:credit_card,bank_transfer,e-wallet'
         ]);
-    
+
         $order = Order::where('id', $request->order_id)
-                      ->where('user_id', auth()->id())
-                      ->firstOrFail(); // Pastikan order milik user
-    
+            ->where('user_id', auth()->id())
+            ->firstOrFail();
+
         $payment = Payment::create([
             'order_id' => $order->id,
             'payment_method' => $request->payment_method,
-            'payment_status' => 'pending',
         ]);
-    
-        // Integrasi gateway pembayaran bisa ditempatkan di sini
-        return redirect()->route('payment.index', $payment->id)
-            ->with('success', 'Payment initiated successfully');
-    }    
 
-    public function success($payment_id)
+        $invoice = Order::select(
+            'orders.id as order_id',
+            'services.service_name',
+            'orders.full_name',
+            'orders.phone',
+            'orders.address',
+            'orders.service_date',
+            'orders.service_time',
+            'orders.status',
+            'payments.payment_method',
+            'services.service_price'
+        )
+            ->join('services', 'orders.service_id', '=', 'services.id')
+            ->join('payments', 'orders.id', '=', 'payments.order_id')
+            ->where('orders.id', $order->id)
+            ->first();
+        session()->put('order_id', $order->id);
+        return redirect()->route('payment.index')
+            ->with('success', 'Payment initiated successfully')
+            ->with('invoice', $invoice);
+    }
+
+
+    public function downloadInvoice($id)
     {
-        $payment = Payment::with('order.service')->findOrFail($payment_id);
-        return view('payment.success', compact('payment'));
+        $order = Order::with('service')
+            ->where('id', $id)
+            ->firstOrFail();
+        $payments = Payment::where('order_id', $id)->first();
+        $data = [
+            'service_name' => $order->service->service_name,
+            'full_name' => $order->full_name,
+            'phone' => $order->phone,
+            'address' => $order->address,
+            'service_date' => $order->service_date,
+            'service_time' => $order->service_time,
+            'status' => $order->status,
+            'payment_method' => $payments->payment_method,
+            'service_price' => $order->service->service_price,
+        ];
+
+        $pdf = Pdf::loadView('pdf.invoice', $data);
+
+        return $pdf->download('invoice_' . $id . '.pdf');
     }
 }

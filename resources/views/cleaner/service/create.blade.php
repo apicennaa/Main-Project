@@ -158,8 +158,7 @@
 <body>
     <nav class="navbar">
         <div class="logo">
-            <span>🧹</span>
-            CleanTime
+            <img src="{{ asset('images/logo.svg') }}" alt="CleanTime Logo" class="h-8">
         </div>
         <div class="nav-links">
             <a href="#">HOME</a>

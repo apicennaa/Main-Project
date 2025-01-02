@@ -9,7 +9,6 @@
         <div class="flex justify-between items-center h-16">
             <div class="flex items-center">
                 <img src="{{ asset('images/logo.png') }}" alt="CleanTime" class="h-8">
-                <span class="ml-2 text-xl font-bold text-teal-600">CleanTime</span>
             </div>
 
             <div class="flex items-center gap-4">
@@ -32,7 +31,7 @@
 
     <!-- Welcome Message -->
     <h1 class="text-2xl font-bold text-gray-800 mb-8">
-        Welcome, {{ auth()->user()->name }}! Here's an overview of your tasks today
+        Welcome! Here's an overview of your tasks today
     </h1>
 
     <!-- Statistics Cards -->

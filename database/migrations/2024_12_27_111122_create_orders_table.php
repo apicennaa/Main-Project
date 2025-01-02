@@ -9,16 +9,20 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+    public function up()
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('cleaner_id')->nullable()->constrained('cleaners')->onDelete('set null');
             $table->foreignId('service_id')->constrained('services')->onDelete('cascade');
-            $table->enum('status', ['pending', 'in_progress', 'completed', 'cancelled']);
-            $table->timestamp('schedule_time');
-            $table->integer('total_price');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->string('full_name');
+            $table->string('phone');
+            $table->text('address');
+            $table->date('service_date');
+            $table->time('service_time');
+            $table->text('note')->nullable();
+            $table->enum('status', ['Pending', 'In Progress', 'Completed', 'Cancelled'])->default('Pending');
+            $table->foreignId('cleaner_id')->nullable()->constrained('users')->onDelete('set null');
             $table->timestamps();
         });
     }

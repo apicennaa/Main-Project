@@ -6,7 +6,7 @@
     <div class="container mx-auto">
         <div class="flex justify-between items-center">
             <!-- Left Content -->
-            <div class="w-1/2 animate-[fadeIn_1s_ease-out]">
+            <div class="w-1/2 animate-[fadeIn_1s_ease-out] pl-7">
                 <h2 class="text-lg text-gray-600 mb-2">HIGHLY PROFESSIONAL CLEANING</h2>
                 <h1 class="text-5xl font-bold mb-4">
                     <span class="text-cyan-500">EASY TO CLEAN</span><br>
@@ -25,7 +25,7 @@
             
             <!-- Right Image -->
             <div class="w-1/2 animate-[fadeIn_1.5s_ease-out]">
-                <img src="{{ asset('images/cleaner.png') }}" alt="Professional Cleaner" class="w-80 h-auto ml-auto mb-16">
+                <img src="{{ asset('images/cleaner.png') }}" alt="Professional Cleaner" class="w-80 h-auto mx-auto mb-16">
             </div>
         </div>
     </div>

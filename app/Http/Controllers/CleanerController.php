@@ -36,32 +36,63 @@ class CleanerController extends Controller
         // Return view dengan data
         return view('user.dashboard', compact('services', 'testimonials'));
     }
-    
+
     public function index()
     {
         $cleaner_id = auth()->id();
-        
+
+        // Statistik pesanan untuk cleaner
         $stats = [
             'total_orders' => Order::where('cleaner_id', $cleaner_id)->count(),
             'pending_tasks' => Order::where('cleaner_id', $cleaner_id)
-                                  ->whereIn('status', ['pending', 'in_progress'])
-                                  ->count(),
+                ->whereIn('status', ['pending', 'in_progress'])
+                ->count(),
             'completed_tasks' => Order::where('cleaner_id', $cleaner_id)
-                                    ->where('status', 'completed')
-                                    ->count(),
+                ->where('status', 'completed')
+                ->count(),
         ];
-    
+
+        // Mengambil orders dengan informasi service dan payment
         $orders = Order::where('cleaner_id', $cleaner_id)
-                      ->with(['user', 'service'])
-                      ->orderBy('schedule_time', 'desc')
-                      ->paginate(10);
-    
-        // Pass the $services variable
-        $services = Service::where('cleaner_id', auth()->id())->get();
+            ->with([
+                'user',
+                'service:id,service_name,service_price',
+                'payment:id,order_id,payment_method'
+            ])
+            ->orderBy('service_date', 'desc')
+            ->paginate(10);
+
+        // Mengambil semua services milik cleaner
+        $services = Service::where('cleaner_id', $cleaner_id)
+            ->select('id', 'service_name', 'service_price', 'cleaner_id')
+            ->get();
 
         return view('cleaner.service.index', compact('stats', 'orders', 'services'));
     }
-    
+
+    public function updateStatus(Request $request, $id)
+    {
+        // Validasi status yang diterima
+        $request->validate([
+            'status' => 'required|in:Pending,In Progress,Completed,Cancelled',
+        ]);
+
+        // Mencari order berdasarkan ID
+        $order = Order::findOrFail($id);
+
+        // Memastikan order milik cleaner yang sedang login
+        if ($order->cleaner_id !== auth()->id()) {
+            return redirect()->back()->with('error', 'Anda tidak memiliki izin untuk memperbarui status pesanan ini.');
+        }
+
+        // Memperbarui status order
+        $order->status = $request->status;
+        $order->save();
+
+        return redirect()->back()->with('success', 'Status pesanan berhasil diperbarui.');
+    }
+
+
     public function createService()
     {
         return view('cleaner.service.create');
@@ -97,14 +128,14 @@ class CleanerController extends Controller
     public function editService($service_name)
     {
         $service = Service::where('service_name', $service_name)->first();
-    
+
         if (!$service) {
             abort(404, 'Service not found');
         }
-    
+
         return view('cleaner.service.edit', compact('service'));
     }
-    
+
 
     // Memperbarui layanan
     public function updateService(Request $request, Service $service)
@@ -135,9 +166,9 @@ class CleanerController extends Controller
         $service = Service::where('service_name', $service_name)->firstOrFail();
         // Hapus data
         $service->delete();
-            return redirect()->route('cleaner.service.index')->with('success', 'Service deleted successfully!');
+        return redirect()->route('cleaner.service.index')->with('success', 'Service deleted successfully!');
     }
-    
+
 
     // public function updateStatus(Request $request, Order $order)
     // {

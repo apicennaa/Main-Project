@@ -8,7 +8,6 @@
             <div class="flex justify-between items-center h-16">
                 <div class="flex items-center">
                     <img src="{{ asset('images/logo.png') }}" alt="CleanTime" class="h-8">
-                    <span class="ml-2 text-xl font-bold text-teal-600">CleanTime</span>
                 </div>
                 
                 <div class="flex items-center gap-6">
